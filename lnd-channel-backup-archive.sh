@@ -72,9 +72,9 @@ upload_to_dropbox() {
       --data-binary @$1)
   UPLOADTIME=$(echo $FINISH | jq -r .server_modified)
   if [ ! -z $UPLOADTIME ] ; then
-    echo "Successfully uploaded $1!"
+    printf "\nSuccessfully uploaded $1!"
   else
-    echo "Unknown error when uploading $1..."
+    printf "\nUnknown error when uploading $1..."
   fi
 }
 
@@ -195,7 +195,6 @@ get_auth_tokens() {
       )
   ISERR=$(echo $RESPONSE | grep error | wc -l)
   if [ $ISERR -gt 0 ]; then
-    ERRMSG=$(echo $RESPONSE | jq -r .error_description)
     printf "\nError retrieving access token and refresh token: ${RESPONSE}"
     DROPBOX_ACCESS_TOKEN=$value_not_set
     DROPBOX_REFRESH_TOKEN=$value_not_set
@@ -282,7 +281,7 @@ get_config_filename() {
 config_save() {
   printf "${color_normal}"
   get_config_filename
-  printf "\n\nSaving updated configuration to ${configfilename}"
+  printf "\n\nSaving updated configuration to ${configfilename}\n"
 cat >${configfilename} <<EOF
 {
   "dropbox": {
