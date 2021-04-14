@@ -30,6 +30,7 @@ color_link=${color_green}
 configlevel=0
 
 refresh_token() {
+  printf "\nRefreshing token"
   RESPONSE=$(curl https://api.dropboxapi.com/oauth2/token \
       -d grant_type=refresh_token \
       -d refresh_token=${DROPBOX_REFRESH_TOKEN} \
@@ -42,6 +43,7 @@ refresh_token() {
     exit 1
   else
     DROPBOX_ACCESS_TOKEN=$(echo $RESPONSE | jq -r .access_token)
+    printf "\nNew token is ${DROPBOX_ACCESS_TOKEN}"
     config_save
   fi
 }
@@ -78,6 +80,28 @@ upload_to_dropbox() {
   fi
 }
 
+setup_backup_filename() {
+  bfe=true
+  bfc=0
+  while $bfe
+  do
+    # get a time stamp in seconds since epoch
+    NEWFILEDATE=`date +%s`
+    # determine backup file name
+    BACKUPFILE="${LOCALBACKUPFILE}.${NEWFILEDATE}"
+    if [ ! -f "${BACKUPFILE}" ]; then
+      bfe=false
+    else
+      bfc=$((bfc++))
+      if [ $bfc -ge 5 ]; then
+        bfe=false
+        break
+      fi
+      sleep 0.1
+    fi
+  done
+}
+
 service_loop() {
   config_load "validate"
   three_hours=10800
@@ -87,10 +111,7 @@ service_loop() {
     ec=$(echo $?)
     if [ $ec -eq 0 ]; then
       # file changed
-      # get a time stamp in seconds since epoch
-      NEWFILEDATE=`date +%s`
-      # determine backup file name and md5 name
-      BACKUPFILE="${LOCALBACKUPFILE}.${NEWFILEDATE}"
+      setup_backup_filename
       MD5SUMFILE="${BACKUPFILE}.md5"
       # copy source to backup and get md5 sum file
       cp $SOURCEFILE $BACKUPFILE
