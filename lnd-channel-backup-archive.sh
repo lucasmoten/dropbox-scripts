@@ -36,7 +36,10 @@ refresh_token() {
       -d refresh_token=${DROPBOX_REFRESH_TOKEN} \
       -u ${DROPBOX_APPKEY}:${DROPBOX_SECRET} \
       )
-  ISERR=$(echo RESPONSE | grep error | wc -l)
+#      -d client_id="${DROPBOX_APPKEY}" \
+#      -d client_secret="${DROPBOX_APPSECRET}" \
+#      )
+  ISERR=$(echo $RESPONSE | grep error | wc -l)
   if [ $ISERR -gt 0 ]; then
     printf "\nError refreshing token. May need to reconfigure using access code or re-approving application"
     printf "\nResponse: ${RESPONSE}"
@@ -54,7 +57,7 @@ check_user() {
       --header "Content-Type: application/json" \
       --data "{\"query\": \"678362\"}" \
       )
-  ISERR=$(echo RESPONSE | grep error | wc -l)
+  ISERR=$(echo $RESPONSE | grep error | wc -l)
   if [ $ISERR -gt 0 ]; then
     refresh_token
   else
