@@ -34,11 +34,9 @@ refresh_token() {
   RESPONSE=$(curl https://api.dropboxapi.com/oauth2/token \
       -d grant_type=refresh_token \
       -d refresh_token=${DROPBOX_REFRESH_TOKEN} \
-      -u ${DROPBOX_APPKEY}:${DROPBOX_SECRET} \
+      -d client_id="${DROPBOX_APPKEY}" \
+      -d client_secret="${DROPBOX_APPSECRET}" \
       )
-#      -d client_id="${DROPBOX_APPKEY}" \
-#      -d client_secret="${DROPBOX_APPSECRET}" \
-#      )
   ISERR=$(echo $RESPONSE | grep error | wc -l)
   if [ $ISERR -gt 0 ]; then
     printf "\nError refreshing token. May need to reconfigure using access code or re-approving application"
@@ -364,7 +362,7 @@ config_require() {
 config_load() {
   printf "${color_normal}"
   get_config_filename
-  printf "\nLoading configuration from ${configfilename}"
+  printf "\nLoading configuration from ${configfilename}\n"
   # check that file exists
   if [ ! -f "${configfilename}" ]; then
     # if running service, then fail when no configuration
